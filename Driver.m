@@ -1,6 +1,7 @@
 close all;
 
 addpath('./dependencies/');
+addpath('./Throw/Debug/');
 
 % define file names
 l_img_file_name = 'left.ppm';
@@ -53,6 +54,8 @@ while numobj > 0
     
     
     pickup_object(xyz, orient);
+    
+    
 end
 
 puma_ready();

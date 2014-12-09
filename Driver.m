@@ -3,6 +3,9 @@ close all;
 addpath('./dependencies/');
 addpath('./Throw/Debug/');
 
+% which puma is being used
+puma_number = '1';
+
 % define file names
 l_img_file_name = 'left.ppm';
 r_img_file_name = 'right.ppm';
@@ -27,7 +30,7 @@ while numobj > 0
     pause(2.5);
     
     % open gripper
-    take_pictures();
+    take_pictures(puma_number);
     gripper('o');
 
     % calculate centroids and orientations for left and right images

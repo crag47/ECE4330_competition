@@ -42,15 +42,17 @@ XYZ_OAT = [robot_x, robot_y, robot_z, o, a, t];
     puma_moveto_xyzoat(robot_x, robot_y, -100, o, a, t);
     
     % lower gripper
+    puma_read();
     puma_speed(20);
     puma_moveto_xyzoat(robot_x, robot_y, robot_z, o, a, t); 
+    puma_read();
     puma_speed(100);
     
     % close gripper
     gripper('c');
 
     %raise gripper
-    puma_moveto_xyzoat(robot_x, robot_y, 0, 0, 90, orient);
+    puma_moveto_xyzoat(robot_x, robot_y, 0, 0, 90, t);
     
 end
 

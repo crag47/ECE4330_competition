@@ -27,7 +27,8 @@ while numobj > 0
    
     % ready position
     puma_ready();
-    pause(2.5);
+    %pause(2.5);
+    puma_read();
     
     % open gripper
     take_pictures(puma_number);

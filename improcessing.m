@@ -1,56 +1,27 @@
-function image = improcessing( image, display )
+function [image, n] = improcessing( image, display, figure_num )
+% Returns the image with objects already categorized into n objects
 
-if display
-    % Setup images
-    i1 = imread(image);
-    figure(1);
-    imshow(i1);
-
-    % Turn the image to black and white
-    i2 = im2bw(i1,.9);
-    figure(2);
-    imshow(i2);
-
-    % Remove small inconsistencies
-    i3 = bwareaopen(i2, 10000, 8);
-    figure(3);
-    imshow(i3);
-
-    % Remove all objects smaller than a cylinder
-    i3 = imcomplement(i3);
-    i4 = bwareaopen(i3, 5000, 8);
-    figure(4);
-    imshow(i4);
-
-    % Remove all objects that are too large to be a cylinder
-    i5 = i4 - bwareaopen(i4, 10000, 8);
-    figure(5);
-    imshow(i5);
-
-    % Get the cylinder that is closest to the robot
-    [i6, n] = bwlabel( i5, 8);
-    i6 = (i6 == n);
-    figure(6);
-    imshow(i6);
-    image = i6;
-else
-    % Setup images
-    image = imread(image);
-
-    % Turn the image to black and white
-    image = im2bw(image,.9);
-    
-    % Remove small inconsistencies
-    image = bwareaopen(image, 10000, 8);
-    
-    % Remove all objects smaller than a cylinder
-    image = bwareaopen(imcomplement(image), 5000, 8);
-    
-    % Remove all objects that are too large to be a cylinder
-    image = image - bwareaopen(image, 10000, 8);
-    
-    % Get the cylinder that is closest to the robot
-    [image, n] = bwlabel( image, 8);
-    image = (image == n);
+    if display == 0
+        % This should run faster since memory allocation is unnecessary
+        image = imread(image); % Read in image
+        image = im2bw(image,.9); % Convert to black and white
+        image = bwareaopen(image, 10000, 8); % Remove small inconsistencies
+        % Remove objects too small
+        image = bwareaopen(imcomplement(image), 5000, 8);
+        % Remove objects too big
+        image = image - bwareaopen(image, 10000, 8); 
+        % Remove all but the closest object
+        [image, n] = bwlabel( image, 8); % Same procedure, but saves each individual image to display
+        
+    else
+        figure(figure_num);
+        i1 = imread(image); subplot(3,2,1); subimage(i1);
+        i2 = im2bw(i1,.9); subplot(3,2,2); subimage(i2);
+        i3 = bwareaopen(i2, 10000, 8);subplot(3,2,3); subimage(i3);
+        i4 = bwareaopen(imcomplement(i3), 5000, 8);subplot(3,2,4); subimage(i4);
+        i5 = i4 - bwareaopen(i4, 10000, 8);subplot(3,2,5); subimage(i5);
+        [i6, n] = bwlabel( i5, 8);
+        image = i6;
+    end
+   
 end
-    

@@ -40,12 +40,11 @@ XYZ_OAT = [robot_x, robot_y, robot_z, o, a, t];
     % set XYZOAT
     puma_speed(20);
     puma_moveto_xyzoat(robot_x, robot_y, -100, o, a, t);
+    puma_moveto_xyzoat(robot_x+40, robot_y-40, robot_z+40, o, a, t);
     
     % lower gripper
-    puma_read();
     puma_speed(20);
     puma_moveto_xyzoat(robot_x, robot_y, robot_z, o, a, t); 
-    puma_read();
     puma_speed(100);
     
     % close gripper

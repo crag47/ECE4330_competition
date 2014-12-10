@@ -16,7 +16,7 @@ end
 
 system(strcat(program,args));
 
-pause(2.5);
+puma_read();
 
 end
 

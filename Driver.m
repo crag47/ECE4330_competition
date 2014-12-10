@@ -19,14 +19,12 @@ r_p = importdata(r_p_file);
 % ready puma for movement
 puma_speed(20);
 puma_ready();
-puma_speed(50);
-numobj = 1;
-
+puma_speed(100);
 
 while numobj > 0
    
     % ready position
-    puma_ready();
+    puma_defense();
     
     % open gripper
     take_pictures(puma_number);

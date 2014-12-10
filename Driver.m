@@ -3,62 +3,80 @@ close all;
 addpath('./dependencies/');
 addpath('./Throw/Debug/');
 
-% which puma is being used
+% Define distance for objects that can use easy pickup
+easy_distance = 100;
+
+% Define which puma we are using
 puma_number = '1';
 
-% define file names
-l_img_file_name = 'left.ppm';
-r_img_file_name = 'right.ppm';
+% Import p matrices
+l_p = importdata('dependencies/left_p_matrix.mat');
+r_p = importdata('dependencies/right_p_matrix.mat');
 
-% import p matrices
-l_p_file = 'dependencies/left_p_matrix.mat';
-r_p_file = 'dependencies/right_p_matrix.mat';
-l_p = importdata(l_p_file);
-r_p = importdata(r_p_file);
-
-% ready puma for movement
+% Place puma in ready position
 puma_speed(20);
 puma_ready();
 puma_speed(100);
 
 while numobj > 0
    
-    % ready position
     puma_defense();
     
-    % open gripper
+    % Process the images
     take_pictures(puma_number);
-    gripper('o');
-
-    % calculate centroids and orientations for left and right images
-    l_stats = find_cent_orient(l_img_file_name);
-    r_stats = find_cent_orient(r_img_file_name);
+    [l_pic, l_n] = improcessing('left.ppm', 1, 1);
+    [r_pic, r_n] = improcessing('right.ppm', 1, 2);
     
-    % break if l_stat or r_stat is an empty struct
-    if ~isfield(l_stats, 'orientations') || ~isfield(r_stats, 'orientations')
-       break;        
+    % Verify that the same number of objects exist in each file
+    if l_n ~= r_n
+        dsp('Images contain different number of objects');
+        continue;
+    end
+
+    % Pick the first easily accessible object
+    obj_found = 0;
+    for i = l_n:-1:1
+        
+        % Remove all but one object
+        l_temp_pic = (l_pic == i);
+        r_temp_pic = (r_pic == i);
+        
+        % Find the centroid in each picture
+        l_cent = regionprops(l_temp_pic, 'Centroid');
+        r_cent = regionprops(r_temp_pic, 'Centroid');
+        points(:,1) = uv2xyz(l_cent.Centroid(1,:).', l_p, r_cent.Centroid(1,:).', r_p);
+        
+        % add offset between robot frame and camera frame
+        xyz = points(:, 1).' + [-410, 140, -190];
+        
+        % Continue if object found is not easily accessible
+        if sqrt(xyz(1)^2 + xyz(2)^2) < easy_distance
+            
+            % An easy object has been found, find it's orientation
+            obj_found = 1;
+            l_orient = orientation(l_temp_pic);
+            r_orient = orientation(r_temp_pic);
+            orient = l_orient + r_orient / 2;
+            break;
+            
+        end
+        
     end
     
-    % get points in uv
-    numobj = size(l_stats.('centroids'), 1);
-    points = zeros([3, numobj]);
-    
-    % get points in xyz
-    points(:, 1) = uv2xyz(l_stats.('centroids')(1,:).', l_p, r_stats.('centroids')(1,:).', r_p);
-    
-    % interpolate between orientations from left and right
-    orient = (l_stats.('orientations')(1) + r_stats.('orientations')(1)) / 2;
-    
-    % add offset between robot frame and camera frame
-    xyz = points(:, 1).' + [-410, 140, -190];
-    
-    
-    pickup_object(xyz, orient);
+    % Pick up an object or process the image for objects touching
+    if obj_found == 1
+        pickup_object(xyz, orient);
+        throw_object();
+    else
+        % find_duplicate_objs();
+        % Get the centroid of the double object
+        % drill(); the objects to a new position
+    end
     
     
 end
 
-puma_ready();
-gripper('o');
+% Place puma in nest position
 puma_speed(20);
+puma_ready();
 puma_nest();

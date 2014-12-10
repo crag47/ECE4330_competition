@@ -1,4 +1,4 @@
-function [  ] = throw( )
+function [  ] = throw_object( )
 
     system('Throw/Debug/./Throw');
 

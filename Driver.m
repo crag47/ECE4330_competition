@@ -4,9 +4,9 @@ addpath('./dependencies/');
 addpath('./Throw/Debug/');
 
 % Definitons
-easy_distance = 100;
+easy_distance = sqrt(183^2 + 362^2);
 areas = [ 500, 5000, 10000 ];
-tolerance = 10;
+tolerance = 40;
 
 % Define which puma we are using
 puma_number = '1';
@@ -27,8 +27,9 @@ for j = 1:10 % THIS WILL HAVE TO BE CHANGED IN FINAL PROJECT
     take_pictures(puma_number);
 
     % Process image with different intensities
-    for i = .9:-.1:.1
-
+    i = 1;
+    while i > .2
+        i = i - .1;
         [l_pic, l_n] = improcessing('left.ppm',i, areas,1,1);
         [r_pic, r_n] = improcessing('right.ppm',i,areas,1,2);
 
@@ -43,10 +44,10 @@ for j = 1:10 % THIS WILL HAVE TO BE CHANGED IN FINAL PROJECT
                 r_temp_pic = (r_pic == n);
 
                 % Find the centroid in each picture
-                t_cent = regionprops(l_temp_pic, 'Centroid');
-                l_cent = t_cent.Centroid(1,:).';
-                t_cent = regionprops(r_temp_pic, 'Centroid');
-                r_cent = t_cent.Centroid(1,:).';
+                l_props = regionprops(l_temp_pic,'Centroid','Perimeter','Orientation');
+                r_props = regionprops(r_temp_pic,'Centroid','Perimeter','Orientation');
+                l_cent = l_props.Centroid(1,:).';
+                r_cent = r_props.Centroid(1,:).';
                 xyz = uv2xyz(l_cent, l_p, r_cent, r_p).';
                 
                 % Check that we are looking at the same object
@@ -57,22 +58,38 @@ for j = 1:10 % THIS WILL HAVE TO BE CHANGED IN FINAL PROJECT
                 end
                 
                 % Set offset for robot coordinate frame
-                xyz(1) = xyz(1) - 410;
-                xyz(2) = xyz(2) + 140;
-                xyz(3) = -190;
+                xyz(1) = xyz(1) - 400;
+                xyz(2) = xyz(2) + 150;
+                xyz(3) = -185;
 
                 % Do nothing if object found is not easily accessible
                 if sqrt(xyz(1)^2 + xyz(2)^2) < easy_distance
 
-                    % An easy object has been found, find it's orientation
-                    l_orient = orientation(l_temp_pic);
-                    r_orient = orientation(r_temp_pic);
-                    orient = l_orient + r_orient / 2;
+                    % Choose the image with least area
+                    % smaller area
+                    if l_props.Perimeter < r_props.Perimeter
+                        orient = orientation(l_temp_pic);
+                    else
+                        orient = orientation(r_temp_pic);
+                    end
 
                     % Pick-up and throw the object
+                    puma_safe();
+                    puma_speed(100);
+                    puma_moveto_xyzoat(xyz(1), xyz(2), -150, 0, 90, orient);
+                    puma_speed(20);
+                    puma_moveto_xyzoat(xyz(1), xyz(2), xyz(3), 0, 90, orient);
+                    gripper('c');
+                    puma_speed(100);
+                    puma_safe();
+                    throw_object();
+                    i = 0;
+                    break;
+
                     %pickup_object(xyz, orient);
                     %throw_object();
-                    %puma_defense();
+                    % i = 0;
+                    %break;
                     
                 end
             end

@@ -15,24 +15,24 @@ function [image, n] = improcessing(image, intensity, areas, display, f_num)
     end
     
     % Remove small inconsistencies
-    image = bwareaopen(image, areas(1), 8);
+    image = bwareaopen(image, areas(1), 4);
     if display == 1
         subplot(3,2,3); subimage(image);
     end
     
     % Remove areas too small to be objects
-    image = bwareaopen(imcomplement(image), areas(2), 8);
+    image = bwareaopen(imcomplement(image), areas(2), 4);
     if display == 1
         subplot(3,2,4); subimage(image);
     end
     
     % Remove areas too big to be objects
-    image = image - bwareaopen(image, areas(3), 8);
+    image = image - bwareaopen(image, areas(3), 4);
     if display == 1
         subplot(3,2,5); subimage(image);
     end
-    
-    [image, n] = bwlabel(image, 8);
+
+    [image, n] = bwlabel(image, 4);
 
 end
 

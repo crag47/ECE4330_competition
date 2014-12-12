@@ -38,6 +38,7 @@ int main() {
 	f << 'o' << endl;
 
 	sleep(1);
+	MOVETO_JOINTS(-60, -200, 110, 0, 90, 70);
 	setSpeed(50);
 
 	f.close();

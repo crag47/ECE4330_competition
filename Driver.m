@@ -9,7 +9,7 @@ areas = [ 500, 5000, 10000 ];
 tolerance = 40;
 
 % Define which puma we are using
-puma_number = '1';
+puma_number = '2';
 
 % Import p matrices
 l_p = importdata('dependencies/left_p_matrix.mat');
@@ -76,12 +76,14 @@ for j = 1:10 % THIS WILL HAVE TO BE CHANGED IN FINAL PROJECT
                     % Pick-up and throw the object
                     puma_safe();
                     puma_speed(100);
-                    puma_moveto_xyzoat(xyz(1), xyz(2), -150, 0, 90, orient);
-                    puma_speed(20);
-                    puma_moveto_xyzoat(xyz(1), xyz(2), xyz(3), 0, 90, orient);
-                    gripper('c');
-                    puma_speed(100);
-                    puma_safe();
+                    
+                    pickup_object([xyz(1), xyz(2)], orient);
+                    %puma_moveto_xyzoat(xyz(1), xyz(2), -150, 0, 90, orient);
+                    %puma_speed(20);
+                    %puma_moveto_xyzoat(xyz(1), xyz(2), xyz(3), 0, 90, orient);
+                    %gripper('c');
+                    %puma_speed(100);
+                    %puma_safe();
                     throw_object();
                     i = 0;
                     break;

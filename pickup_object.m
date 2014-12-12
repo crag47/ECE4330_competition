@@ -73,7 +73,7 @@ XYZ_OAT = [robot_x, robot_y, robot_z, o, a, t];
     gripper('c');
 
     %raise gripper
-    puma_moveto_xyzoat(robot_x, robot_y, 0, 0, 90, t);
+    puma_safe();
     
 end
 

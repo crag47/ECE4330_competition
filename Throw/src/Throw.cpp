@@ -32,7 +32,7 @@ int main() {
 
 
 	// Sleep
-	usleep(715000);
+	usleep(722000);
 
 	// Open gripper
 	f << 'o' << endl;

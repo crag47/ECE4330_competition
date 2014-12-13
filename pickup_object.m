@@ -2,10 +2,10 @@ function [ XYZ_OAT ] = pickup_object( centroid, orientation )
 %GET_XYZOAT Summary of this function goes here
 %   Detailed explanation goes here
 
-robot_radius = sqrt(183^2 + 362^2);
+robot_radius = sqrt(180^2 + 360^2);
 d_tool = 125;
 d_gripper_center = 110;
-robot_z = -190;
+robot_z = -188;
 
 %centroid = [-340, 320];
 x = centroid(1);
@@ -16,6 +16,7 @@ t = orientation;
 
 x_pad = x;
 y_pad = y;
+z_pad = robot_z;
 
 theta = atan2d(y,x);
 radius = sqrt(x^2 + y^2);
@@ -35,18 +36,42 @@ if radius > robot_radius
     % quad I
     if y < 222
         t = t + 68;
-        x_pad = robot_x + 40;
+        x_pad = robot_x + 20;
         y_pad = robot_y;
+        if x < -395
+            z_pad = robot_z + 40;
+        else
+            z_pad = robot_z + 60;
+        end
     %quad II
     elseif x < -340
         t = t + 68;
-        x_pad = robot_x + 40;
-        y_pad = robot_y - 40;
+        x_pad = robot_x + 20;
+        y_pad = robot_y - 20;
+        if y > 279
+            z_pad = robot_z + 40;
+        else
+            z_pad = robot_z + 60;
+        end
     %quad III and IV
-    elseif x < -266
+    elseif x < -280
         t = t + 48;
         x_pad = robot_x;
         y_pad = robot_y - 20;
+        if y > 279
+            z_pad = robot_z + 40;
+        else
+            z_pad = robot_z + 60;
+        end
+    else
+        t = t + 30;
+        x_pad = robot_x;
+        y_pad = robot_y - 20;
+        if y > 279
+            z_pad = robot_z + 40;
+        else
+            z_pad = robot_z + 60;
+        end
     end
     
 % else use coordinates of centroid
@@ -62,7 +87,7 @@ XYZ_OAT = [robot_x, robot_y, robot_z, o, a, t];
     puma_speed(20);
     puma_moveto_xyzoat(robot_x, robot_y, -100, o, a, t);
     gripper('o');
-    puma_moveto_xyzoat(x_pad, y_pad, robot_z + 40, o, a, t);
+    puma_moveto_xyzoat(x_pad, y_pad, z_pad, o, a, t);
     
     % lower gripper
     puma_speed(20);

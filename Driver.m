@@ -21,21 +21,18 @@ puma_ready();
 puma_speed(100);
 puma_defense();
 
-for j = 1:10 % THIS WILL HAVE TO BE CHANGED IN FINAL PROJECT
+for j = 1:99999999 % THIS WILL HAVE TO BE CHANGED IN FINAL PROJECT
 
     % Process the images
     take_pictures(puma_number);
 
     % Process image with different intensities
-    i = 1;
-    while i > .2
-        i = i - .1;
-        [l_pic, l_n] = improcessing('left.ppm',i, areas,1,1);
-        [r_pic, r_n] = improcessing('right.ppm',i,areas,1,2);
+    i = 10;
+    while i > 2
+        i = i - 1;
+        [l_pic, r_pic, l_n, r_n] = process_images('left.ppm', 'right.ppm', i, areas, 1, 1, 2);
 
-        % Is object detected at this intensity
         if l_n == r_n && l_n ~= 0
-
             % Find the first easily accessible object
             for n = l_n:-1:1
 
@@ -44,7 +41,7 @@ for j = 1:10 % THIS WILL HAVE TO BE CHANGED IN FINAL PROJECT
                 r_temp_pic = (r_pic == n);
 
                 % Find the centroid in each picture
-                l_props = regionprops(l_temp_pic,'Centroid','Perimeter','Orientation');
+                l_props = regionprops(l_temp_pic,'Centroid','Perimeter','Orientation');           
                 r_props = regionprops(r_temp_pic,'Centroid','Perimeter','Orientation');
                 l_cent = l_props.Centroid(1,:).';
                 r_cent = r_props.Centroid(1,:).';
@@ -58,12 +55,12 @@ for j = 1:10 % THIS WILL HAVE TO BE CHANGED IN FINAL PROJECT
                 end
                 
                 % Set offset for robot coordinate frame
-                xyz(1) = xyz(1) - 400;
-                xyz(2) = xyz(2) + 150;
+                xyz(1) = xyz(1) - 410;
+                xyz(2) = xyz(2) + 140;
                 xyz(3) = -185;
 
                 % Do nothing if object found is not easily accessible
-                if sqrt(xyz(1)^2 + xyz(2)^2) < easy_distance
+                % if sqrt(xyz(1)^2 + xyz(2)^2) < easy_distance
 
                     % Choose the image with least area
                     % smaller area
@@ -78,31 +75,47 @@ for j = 1:10 % THIS WILL HAVE TO BE CHANGED IN FINAL PROJECT
                     puma_speed(100);
                     
                     pickup_object([xyz(1), xyz(2)], orient);
-                    %puma_moveto_xyzoat(xyz(1), xyz(2), -150, 0, 90, orient);
-                    %puma_speed(20);
-                    %puma_moveto_xyzoat(xyz(1), xyz(2), xyz(3), 0, 90, orient);
-                    %gripper('c');
-                    %puma_speed(100);
-                    %puma_safe();
                     throw_object();
                     i = 0;
                     break;
-
-                    %pickup_object(xyz, orient);
-                    %throw_object();
-                    % i = 0;
-                    %break;
                     
-                end
+                % end
             end
         end
-        
-        % When i == .1, check for adjacent objects
-        % process image with different area
-        % drill()
-        % puma_defense()
-        
     end
+        
+        % When i == 2, check for adjacent objects
+        if i == 2
+            new_areas = areas * 2;
+            new_areas(3) = new_areas(3) * 1.5;
+            [l_pic, l_n] = improcessing('left.ppm',.9, new_areas,1,1);
+            [r_pic, r_n] = improcessing('right.ppm',.9,new_areas,1,2);
+            
+          %   if l_n == r_n && l_n ~= 0
+            if l_n ~= 0 && r_n ~= 0
+            
+                % Find the centroid in each picture
+                l_temp_pic = (l_pic == l_n);
+                r_temp_pic = (r_pic == r_n);
+                l_props = regionprops(l_temp_pic,'Centroid');      
+                r_props = regionprops(r_temp_pic,'Centroid');
+                l_cent = l_props.Centroid(1,:).';
+                r_cent = r_props.Centroid(1,:).';
+                if(abs(l_cent) < abs(r_cent))
+                   l_cent = r_cent;
+                else
+                    r_cent = l_cent;
+                end
+                xyz = uv2xyz(l_cent, l_p, r_cent, r_p).';
+
+                % Set offset for robot coordinate frame
+                puma_safe();
+                drill(xyz(1)-410,xyz(2)+140);
+                puma_defense();
+            end
+            
+       end
+        
 end
 
 % Place puma in nest position
